@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-secondary-50 text-secondary-900;
+  }
+
+  /* Custom variables for colors */
+  :root {
+    --color-primary-50: #f0f9ff;
+    --color-primary-100: #e0f2fe;
+    --color-primary-200: #bae6fd;
+    --color-primary-300: #7dd3fc;
+    --color-primary-400: #38bdf8;
+    --color-primary-500: #0ea5e9;
+    --color-primary-600: #0284c7;
+    --color-primary-700: #0369a1;
+    --color-primary-800: #075985;
+    --color-primary-900: #0c4a6e;
+
+    --color-secondary-50: #f8fafc;
+    --color-secondary-100: #f1f5f9;
+    --color-secondary-200: #e2e8f0;
+    --color-secondary-300: #cbd5e1;
+    --color-secondary-400: #94a3b8;
+    --color-secondary-500: #64748b;
+    --color-secondary-600: #475569;
+    --color-secondary-700: #334155;
+    --color-secondary-800: #1e293b;
+    --color-secondary-900: #0f172a;
+
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+    --color-emergency: #dc2626;
+    --color-info: #3b82f6;
+    --color-waiting: #6366f1;
+    --color-inProgress: #8b5cf6;
+    --color-complete: #059669;
+
+    /* ShadCN variables */
+    --background: var(--color-secondary-50);
+    --foreground: var(--color-secondary-900);
+    --card: 0 0% 100%;
+    --card-foreground: var(--color-secondary-900);
+    --popover: 0 0% 100%;
+    --popover-foreground: var(--color-secondary-900);
+    --primary: var(--color-primary-600);
+    --primary-foreground: var(--color-primary-50);
+    --secondary: var(--color-secondary-200);
+    --secondary-foreground: var(--color-secondary-800);
+    --muted: var(--color-secondary-100);
+    --muted-foreground: var(--color-secondary-500);
+    --accent: var(--color-secondary-100);
+    --accent-foreground: var(--color-secondary-900);
+    --destructive: var(--color-danger);
+    --destructive-foreground: 210 40% 98%;
+    --border: var(--color-secondary-200);
+    --input: var(--color-secondary-200);
+    --ring: var(--color-primary-500);
+    --radius: 0.5rem;
+  }
+}
+
+@layer components {
+  .room-status-indicator {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .queue-item {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  
+  .announcement-animation {
+    animation: highlight 3s ease-in-out;
+  }
+  
+  @keyframes highlight {
+    0%, 100% { @apply bg-transparent; }
+    50% { @apply bg-primary-100; }
+  }
+}
