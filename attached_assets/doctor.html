@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Queue - Doctor</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="dashboard-header">
+            <h1>Doctor Dashboard</h1>
+            <div class="dashboard-nav">
+                <a href="index.html">Reception</a>
+                <a href="triage.html">Triage</a>
+                <span class="active">Doctor</span>
+                <a href="display.html" target="_blank">Patient Display</a>
+            </div>
+        </header>
+        
+        <div class="control-section">
+            <h2>Current Consultation</h2>
+            <div id="currentPatient" class="patient-card">
+                <p>No patient in consultation</p>
+            </div>
+            
+            <div class="room-selection">
+                <label for="doctorId">Consultation Room:</label>
+                <select id="doctorId" class="form-control" onchange="updateDoctorId()">
+                    <option value="dr1">Room 1</option>
+                    <option value="dr2">Room 2</option>
+                    <option value="dr3">Room 3</option>
+                    <option value="dr4">Room 4</option>
+                </select>
+            </div>
+            
+            <button id="callDoctorBtn" class="btn btn-primary">
+                <i class="fas fa-bell"></i> Call Next Patient
+            </button>
+            <button id="completeConsultBtn" class="btn btn-secondary">
+                <i class="fas fa-check-circle"></i> Complete Consultation
+            </button>
+        </div>
+        
+        <div class="queue-preview">
+            <h2>Consultation Queue</h2>
+            <div class="queue-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Current Room:</span>
+                    <span id="currentRoomDisplay" class="stat-value">Room 1</span>
+                </div>
+            </div>
+            <div id="doctorQueue" class="queue-container">
+                <p>Loading queue data...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script>
+        window.pageType = 'doctor';
+        window.doctorId = 'dr1'; // Default to room 1
+        
+        function updateDoctorId() {
+            const select = document.getElementById('doctorId');
+            window.doctorId = select.value;
+            document.getElementById('currentRoomDisplay').textContent = 'Room ' + window.doctorId.replace('dr', '');
+            
+            // Refresh the queue display for the new room
+            const event = new Event('doctorRoomChanged');
+            document.dispatchEvent(event);
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Queue - Reception</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="dashboard-header">
+            <h1>Reception Dashboard</h1>
+            <div class="dashboard-nav">
+                <span class="active">Reception</span>
+                <a href="triage.html">Triage Nurse</a>
+                <a href="doctor.html">Doctor</a>
+                <a href="display.html" target="_blank">Patient Display</a>
+            </div>
+        </header>
+        
+        <div class="control-section full-width">
+            <h2>Patient Registration</h2>
+            <form id="patientForm" class="patient-form">
+                <div class="form-group">
+                    <label for="patientName">Patient Name:</label>
+                    <input type="text" id="patientName" required>
+                </div>
+                <div class="form-group">
+                    <label for="department">Department:</label>
+                    <select id="department" required>
+                        <option value="General">General</option>
+                        <option value="Consultation">Consultation</option>
+                        <option value="Emergency">Emergency</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="isEmergency">Emergency Case:</label>
+                    <input type="checkbox" id="isEmergency">
+                </div>
+                <button type="submit" class="btn btn-primary">Register Patient</button>
+            </form>
+            <div id="lastToken" class="token-display">Last token: None</div>
+        </div>
+        
+        <div class="queue-preview">
+            <h2>Current Queue</h2>
+            <div class="queue-filters">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="waiting">Waiting</button>
+                <button class="filter-btn" data-filter="in-triage">In Triage</button>
+            </div>
+            <div id="queueContainer" class="queue-container">
+                <p>Loading queue data...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script>
+        window.pageType = 'reception';
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

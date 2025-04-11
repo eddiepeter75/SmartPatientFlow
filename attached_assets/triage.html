@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Queue - Triage</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="dashboard-header">
+            <h1>Triage Nurse Dashboard</h1>
+            <div class="dashboard-nav">
+                <a href="index.html">Reception</a>
+                <span class="active">Triage</span>
+                <a href="doctor.html">Doctor</a>
+                <a href="display.html" target="_blank">Patient Display</a>
+            </div>
+        </header>
+        
+        <div class="control-section">
+            <h2>Next Patient</h2>
+            <div id="nextPatient" class="patient-card">
+                <p>No patients waiting</p>
+            </div>
+            
+            <div class="room-assignment-section">
+                <h3>Room Assignment</h3>
+                <div class="form-group">
+                    <label for="assignRoom">Assign to Room:</label>
+                    <select id="assignRoom" class="form-control">
+                        <option value="Consultation room 1">Room 1</option>
+                        <option value="Consultation room 2">Room 2</option>
+                        <option value="Consultation room 3">Room 3</option>
+                        <option value="Consultation room 4">Room 4</option>
+                    </select>
+                </div>
+                <button id="reassignRoomBtn" class="btn btn-info">
+                    <i class="fas fa-exchange-alt"></i> Reassign Room
+                </button>
+            </div>
+            
+            <div class="triage-actions">
+                <button id="callTriageBtn" class="btn btn-primary">
+                    <i class="fas fa-bell"></i> Call Next Patient
+                </button>
+                <button id="completeTriageBtn" class="btn btn-secondary">
+                    <i class="fas fa-check-circle"></i> Complete Triage
+                </button>
+            </div>
+        </div>
+        
+        <div class="queue-preview">
+            <h2>Triage Queue</h2>
+            <div class="queue-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Waiting:</span>
+                    <span id="waitingCount" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Urgent:</span>
+                    <span id="urgentCount" class="stat-value">0</span>
+                </div>
+            </div>
+            <div id="triageQueue" class="queue-container">
+                <p>Loading queue data...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script>
+        window.pageType = 'triage';
+        let currentPatientId = null;
+    </script>
+    <!-- Load app.js first to initialize Firebase -->
+    <script src="app.js"></script>
+    <script>
+        // Add functionality for room reassignment
+        document.getElementById('reassignRoomBtn').addEventListener('click', function() {
+            if (!currentPatientId) {
+                alert('No patient selected for reassignment');
+                return;
+            }
+            
+            const newRoom = document.getElementById('assignRoom').value;
+            // Use the database variable from app.js instead of creating a new one
+            tokensRef.child(currentPatientId).update({
+                assignedRoom: newRoom
+            }).then(() => {
+                alert('Room reassigned successfully');
+            }).catch(error => {
+                console.error('Error reassigning room:', error);
+                alert('Error reassigning room');
+            });
+        });
+        
+        // Override the updatePatientForTriage function to store the current patient ID
+        const originalUpdatePatientForTriage = window.updatePatientForTriage;
+        window.updatePatientForTriage = function(tokenId, token) {
+            currentPatientId = tokenId;
+            if (originalUpdatePatientForTriage) {
+                originalUpdatePatientForTriage(tokenId, token);
+            }
+        };
+        
+        // Update the complete triage function to maintain the currentPatientId variable
+        document.addEventListener('DOMContentLoaded', function() {
+            const originalComplete = document.getElementById('completeTriageBtn').onclick;
+            document.getElementById('completeTriageBtn').onclick = function() {
+                currentPatientId = null;
+                if (originalComplete) {
+                    originalComplete();
+                }
+            };
+        });
+        
+        // Update waiting count stats - use the existing tokensRef from app.js
+        tokensRef.on('value', function(snapshot) {
+            const tokens = snapshot.val();
+            let waitingCount = 0;
+            let urgentCount = 0;
+            
+            if (tokens) {
+                Object.values(tokens).forEach(token => {
+                    if (token.status === 'waiting') {
+                        waitingCount++;
+                        if (token.priority === 'urgent') {
+                            urgentCount++;
+                        }
+                    }
+                });
+            }
+            
+            document.getElementById('waitingCount').textContent = waitingCount;
+            document.getElementById('urgentCount').textContent = urgentCount;
+        });
+    </script>
+</body>
+</html>

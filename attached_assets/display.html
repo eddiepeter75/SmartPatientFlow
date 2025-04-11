@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Queue Display</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="display-body">
+    <div class="display-container">
+        <header class="display-header">
+            <div class="hospital-info">
+                <i class="fas fa-hospital"></i>
+                <h1>Hospital Queue Status</h1>
+            </div>
+            <div class="clock-container">
+                <span id="currentTime" class="current-time">00:00:00</span>
+                <span id="currentDate" class="current-date">Loading...</span>
+            </div>
+        </header>
+        
+        <div class="now-serving-section">
+            <div class="section-header">
+                <i class="fas fa-user-md"></i>
+                <h2>Now Serving</h2>
+            </div>
+            <div class="current-token-card">
+                <div id="currentPatientName" class="current-patient-name">---</div>
+                <div class="token-details">
+                    <div id="currentRoom" class="current-room"></div>
+                    <div id="currentToken" class="current-token"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="queue-section">
+            <!-- General Queue -->
+            <div class="department-queue" id="generalQueue">
+                <div class="department-header">
+                    <i class="fas fa-clipboard-list"></i>
+                    <h3>General Queue</h3>
+                </div>
+                <div class="queue-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Waiting:</span>
+                        <span id="generalWaiting" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Urgent:</span>
+                        <span id="generalUrgent" class="stat-value">0</span>
+                    </div>
+                </div>
+                <div id="generalQueueList" class="queue-list"></div>
+            </div>
+            
+            <!-- Consultation Rooms 1-4 -->
+            <div class="department-queue" id="consultationRoom1">
+                <div class="department-header">
+                    <i class="fas fa-door-open"></i>
+                    <h3>Consultation Room 1</h3>
+                </div>
+                <div class="queue-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Waiting:</span>
+                        <span id="room1Waiting" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Now Serving:</span>
+                        <span id="room1Current" class="stat-value">---</span>
+                    </div>
+                </div>
+                <div id="consultationQueueList1" class="queue-list"></div>
+            </div>
+            
+            <div class="department-queue" id="consultationRoom2">
+                <div class="department-header">
+                    <i class="fas fa-door-open"></i>
+                    <h3>Consultation Room 2</h3>
+                </div>
+                <div class="queue-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Waiting:</span>
+                        <span id="room2Waiting" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Now Serving:</span>
+                        <span id="room2Current" class="stat-value">---</span>
+                    </div>
+                </div>
+                <div id="consultationQueueList2" class="queue-list"></div>
+            </div>
+            
+            <div class="department-queue" id="consultationRoom3">
+                <div class="department-header">
+                    <i class="fas fa-door-open"></i>
+                    <h3>Consultation Room 3</h3>
+                </div>
+                <div class="queue-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Waiting:</span>
+                        <span id="room3Waiting" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Now Serving:</span>
+                        <span id="room3Current" class="stat-value">---</span>
+                    </div>
+                </div>
+                <div id="consultationQueueList3" class="queue-list"></div>
+            </div>
+            
+            <div class="department-queue" id="consultationRoom4">
+                <div class="department-header">
+                    <i class="fas fa-door-open"></i>
+                    <h3>Consultation Room 4</h3>
+                </div>
+                <div class="queue-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Waiting:</span>
+                        <span id="room4Waiting" class="stat-value">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Now Serving:</span>
+                        <span id="room4Current" class="stat-value">---</span>
+                    </div>
+                </div>
+                <div id="consultationQueueList4" class="queue-list"></div>
+            </div>
+        </div>
+        
+        <div class="announcements-section">
+            <div class="announcement-bar" id="announcementBar">
+                <div class="announcement-content">
+                    <i class="fas fa-bullhorn"></i>
+                    <span id="announcementText">Welcome to Hospital Queue Management System. Please wait for your name to be called.</span>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="display-footer">
+            <div class="last-updated">
+                Last updated: <span id="updateTime">Loading...</span>
+            </div>
+            <div class="footer-message">
+                <i class="fas fa-info-circle"></i>
+                <span>Please proceed to your assigned consultation room when your name is called</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Sound enable button -->
+    <div class="sound-control">
+        <button id="enableSoundButton" class="btn sound-btn">
+            <i class="fas fa-volume-up"></i> Enable Sound Notifications
+        </button>
+    </div>
+
+    <!-- Audio alert for name calls -->
+    <audio id="nameAlertSound" src="https://soundbible.com/grab.php?id=2206&type=mp3" preload="auto"></audio>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCt7JCmc3SL9w_TvHWAXTbs6uPH1RVkbKE",
+            authDomain: "queue-management-system-86aec.firebaseapp.com",
+            databaseURL: "https://queue-management-system-86aec-default-rtdb.firebaseio.com",
+            projectId: "queue-management-system-86aec",
+            storageBucket: "queue-management-system-86aec.firebasestorage.app",
+            messagingSenderId: "690840302833",
+            appId: "1:690840302833:web:78c1cec75396c7be62e550",
+            measurementId: "G-B3BBKQWSTN"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Global Variables
+        let currentDisplayedPatient = null;
+        let lastCalledPatient = null;
+        let soundEnabled = false;
+        let patientCallQueue = [];
+        let processingCall = false;
+        
+        // Sound button initialization
+        document.getElementById('enableSoundButton').addEventListener('click', function() {
+            soundEnabled = true;
+            this.innerHTML = '<i class="fas fa-volume-up"></i> Sound Notifications Enabled';
+            this.classList.add('sound-enabled');
+            
+            // Play a test sound to confirm permission is granted
+            const alertSound = document.getElementById('nameAlertSound');
+            alertSound.volume = 0.5;
+            alertSound.play().catch(error => {
+                console.log("Audio play failed:", error);
+            });
+            
+            // Process any pending calls in the queue
+            processPatientCallQueue();
+        });
+        
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            const timeElement = document.getElementById('currentTime');
+            const dateElement = document.getElementById('currentDate');
+            
+            timeElement.textContent = now.toLocaleTimeString();
+            dateElement.textContent = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+        
+        // Start clock and update every second
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        // Process patient call queue
+        function processPatientCallQueue() {
+            if (processingCall || patientCallQueue.length === 0 || !soundEnabled) return;
+            
+            processingCall = true;
+            const patientData = patientCallQueue.shift();
+            
+            // Update announcement with patient name and room
+            const announcementText = document.getElementById('announcementText');
+            const roomDirection = patientData.assignedRoom 
+                ? ` to ${patientData.assignedRoom}`
+                : " to the consultation area";
+            
+            announcementText.innerHTML = `
+                <span class="announcement-text-large">
+                    <span class="patient-name-display">${patientData.name}</span>,
+                    please proceed${roomDirection}
+                </span>
+            `;
+            
+            // Play sound notification
+            const alertSound = document.getElementById('nameAlertSound');
+            alertSound.volume = 0.5;
+            
+            alertSound.play()
+                .then(() => {
+                    // Text-to-speech announcement
+                    if ('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(
+                            `Patient ${patientData.name}, please proceed${roomDirection}`
+                        );
+                        utterance.rate = 0.9; // Slightly slower for clarity
+                        utterance.onend = function() {
+                            processingCall = false;
+                            // Process next in queue if any
+                            setTimeout(processPatientCallQueue, 500);
+                        };
+                        speechSynthesis.speak(utterance);
+                    } else {
+                        processingCall = false;
+                        setTimeout(processPatientCallQueue, 3000);
+                    }
+                })
+                .catch(error => {
+                    console.log("Audio play failed:", error);
+                    processingCall = false;
+                    setTimeout(processPatientCallQueue, 100);
+                });
+            
+            // Animate announcement
+            const announcementBar = document.getElementById('announcementBar');
+            announcementBar.classList.add('highlight-announcement');
+            setTimeout(() => {
+                announcementBar.classList.remove('highlight-announcement');
+            }, 5000);
+        }
+        
+        // Function to call patient by name with room number
+        function callPatient(patientData) {
+            // Update current patient display regardless of sound status
+            const currentNameEl = document.getElementById('currentPatientName');
+            const currentRoomEl = document.getElementById('currentRoom');
+            const currentTokenEl = document.getElementById('currentToken');
+            
+            if (patientData) {
+                currentNameEl.textContent = patientData.name;
+                currentRoomEl.textContent = patientData.assignedRoom || "Consultation Area";
+                currentTokenEl.textContent = `Token: ${patientData.token}`;
+                currentDisplayedPatient = patientData.token;
+                
+                // Only queue for announcement if this is a new patient
+                if (patientData.token !== lastCalledPatient?.token) {
+                    patientCallQueue.push(patientData);
+                    lastCalledPatient = patientData;
+                    processPatientCallQueue();
+                }
+            } else {
+                currentNameEl.textContent = '---';
+                currentRoomEl.textContent = '';
+                currentTokenEl.textContent = '';
+                currentDisplayedPatient = null;
+            }
+        }
+        
+        // Update queue statistics
+        function updateQueueStats(tokens) {
+            const rooms = ['Consultation room 1', 'Consultation room 2', 'Consultation room 3', 'Consultation room 4'];
+            const statsIds = ['room1', 'room2', 'room3', 'room4'];
+            
+            // Reset all counters
+            rooms.forEach((_, index) => {
+                document.getElementById(`${statsIds[index]}Waiting`).textContent = '0';
+                document.getElementById(`${statsIds[index]}Current`).textContent = '---';
+            });
+            
+            document.getElementById('generalWaiting').textContent = '0';
+            document.getElementById('generalUrgent').textContent = '0';
+            
+            if (!tokens) return;
+            
+            // Count patients in general queue
+            let generalWaiting = 0;
+            let generalUrgent = 0;
+            
+            // Count patients by consultation room
+            rooms.forEach((room, index) => {
+                let waitingCount = 0;
+                let currentPatient = '---';
+                
+                Object.values(tokens).forEach(token => {
+                    if (token.assignedRoom === room) {
+                        if (token.status === 'in-consultation') {
+                            currentPatient = token.name;
+                        } else if (token.status === 'waiting-consultation') {
+                            waitingCount++;
+                        }
+                    }
+                    
+                    // Count general queue
+                    if (token.department === 'General' && token.status === 'waiting') {
+                        generalWaiting++;
+                        if (token.priority === 'urgent') {
+                            generalUrgent++;
+                        }
+                    }
+                });
+                
+                document.getElementById(`${statsIds[index]}Waiting`).textContent = waitingCount;
+                document.getElementById(`${statsIds[index]}Current`).textContent = currentPatient;
+            });
+            
+            document.getElementById('generalWaiting').textContent = generalWaiting;
+            document.getElementById('generalUrgent').textContent = generalUrgent;
+        }
+        
+        // Function to render queue with patient names and room assignments
+        function renderQueue(queueElementId, tokens, filter) {
+            const queueList = document.getElementById(queueElementId);
+            queueList.innerHTML = '';
+            
+            if (!tokens || Object.keys(tokens).length === 0) {
+                queueList.innerHTML = '<div class="empty-queue">No patients waiting</div>';
+                return;
+            }
+            
+            // Convert to array and filter
+            const patientsArray = Object.entries(tokens)
+                .map(([tokenId, data]) => ({
+                    token: tokenId,
+                    ...data
+                }))
+                .filter(patient => {
+                    if (filter === 'general') {
+                        return patient.department === 'General' && patient.status === 'waiting';
+                    } else if (filter.startsWith('room')) {
+                        const roomNum = filter.replace('room', '');
+                        return patient.assignedRoom === `Consultation room ${roomNum}` && 
+                               (patient.status === 'waiting-consultation' || patient.status === 'in-consultation');
+                    }
+                    return false;
+                });
+            
+            // Sort: urgent first, then by timestamp
+            patientsArray.sort((a, b) => {
+                if (a.priority === 'urgent' && b.priority !== 'urgent') return -1;
+                if (a.priority !== 'urgent' && b.priority === 'urgent') return 1;
+                return a.timestamp - b.timestamp;
+            });
+            
+            if (patientsArray.length === 0) {
+                queueList.innerHTML = '<div class="empty-queue">No patients waiting</div>';
+                return;
+            }
+            
+            patientsArray.forEach(patient => {
+                const patientItem = document.createElement('div');
+                patientItem.className = 'patient-item';
+                
+                // Add specific classes based on status
+                if (patient.status === 'in-consultation') {
+                    patientItem.classList.add('active-patient');
+                }
+                
+                if (patient.token === currentDisplayedPatient) {
+                    patientItem.classList.add('called-patient');
+                }
+                
+                if (patient.priority === 'urgent') {
+                    patientItem.classList.add('urgent-patient');
+                }
+                
+                // Calculate waiting time
+                const waitingTime = Math.floor((Date.now() - patient.timestamp) / 60000); // in minutes
+                
+                patientItem.innerHTML = `
+                    <div class="patient-info">
+                        <div class="patient-name">${patient.name}</div>
+                        <div class="patient-meta">
+                            <span class="patient-token">Token: ${patient.token}</span>
+                            ${patient.priority === 'urgent' ? '<span class="urgent-badge">URGENT</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="patient-status">
+                        <div class="waiting-time">
+                            <i class="fas fa-stopwatch"></i> ${waitingTime} min
+                        </div>
+                        ${patient.assignedRoom ? `<div class="assigned-room">${patient.assignedRoom}</div>` : ''}
+                    </div>
+                `;
+                
+                queueList.appendChild(patientItem);
+            });
+        }
+        
+        // Listen for patient data changes
+        database.ref('patients/tokens').on('value', (snapshot) => {
+            const tokens = snapshot.val();
+            document.getElementById('updateTime').textContent = new Date().toLocaleTimeString();
+            
+            // Update queue statistics
+            updateQueueStats(tokens);
+            
+            if (!tokens) {
+                callPatient(null);
+                return;
+            }
+            
+            // Find currently serving patients (in consultation)
+            let currentPatient = null;
+            
+            Object.entries(tokens).forEach(([tokenId, data]) => {
+                if (data.status === 'in-consultation') {
+                    // If there are multiple, prefer the most recently called one
+                    if (!currentPatient || 
+                        (data.consultationStartTime && 
+                         currentPatient.consultationStartTime && 
+                         data.consultationStartTime > currentPatient.consultationStartTime)) {
+                        currentPatient = { token: tokenId, ...data };
+                    }
+                }
+            });
+            
+            // Update current patient display
+            callPatient(currentPatient);
+            
+            // Render queues for each area
+            renderQueue('generalQueueList', tokens, 'general');
+            renderQueue('consultationQueueList1', tokens, 'room1');
+            renderQueue('consultationQueueList2', tokens, 'room2');
+            renderQueue('consultationQueueList3', tokens, 'room3');
+            renderQueue('consultationQueueList4', tokens, 'room4');
+        });
+        
+        // Default announcements when no patients are being called
+        const announcementMessages = [
+            "Please wait for your name to be called.",
+            "Check the screens for your assigned consultation room.",
+            "Please maintain social distancing in the waiting area.",
+            "Thank you for your patience."
+        ];
+        
+        let announcementIndex = 0;
+        let announcementRotationPaused = false;
+        
+        // Change announcement every 20 seconds if not showing patient call
+        setInterval(() => {
+            // Only rotate announcements if not currently showing a patient call
+            if (!announcementRotationPaused && !processingCall) {
+                announcementIndex = (announcementIndex + 1) % announcementMessages.length;
+                const announcementText = document.getElementById('announcementText');
+                
+                announcementText.style.opacity = 0;
+                setTimeout(() => {
+                    announcementText.innerHTML = announcementMessages[announcementIndex];
+                    announcementText.style.opacity = 1;
+                }, 500);
+            }
+        }, 20000);
+        
+        // Add some visual feedback when data updates
+        function flashUpdate() {
+            const displayContainer = document.querySelector('.display-container');
+            displayContainer.classList.add('data-update');
+            setTimeout(() => {
+                displayContainer.classList.remove('data-update');
+            }, 300);
+        }
+        
+        // Auto-refresh the page every hour to prevent memory issues
+        setTimeout(() => location.reload(), 3600000);
+        
+        // Add some CSS for the new elements
+        const style = document.createElement('style');
+        style.textContent = `
+            .sound-control {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 1000;
+            }
+            
+            .sound-btn {
+                padding: 10px 15px;
+                background-color: #f1f1f1;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            }
+            
+            .sound-btn:hover {
+                background-color: #e3e3e3;
+            }
+            
+            .sound-enabled {
+                background-color: #4CAF50;
+                color: white;
+            }
+            
+            .data-update {
+                animation: flash-update 0.3s;
+            }
+            
+            @keyframes flash-update {
+                0% { opacity: 1; }
+                50% { opacity: 0.8; }
+                100% { opacity: 1; }
+            }
+            
+            .highlight-announcement {
+                animation: highlight 2s infinite;
+            }
+            
+            @keyframes highlight {
+                0% { background-color: #f1f1f1; }
+                50% { background-color: #ffecb3; }
+                100% { background-color: #f1f1f1; }
+            }
+            
+            .announcement-text-large {
+                font-size: 1.2em;
+                font-weight: bold;
+            }
+            
+            .patient-name-display {
+                color: #e74c3c;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
