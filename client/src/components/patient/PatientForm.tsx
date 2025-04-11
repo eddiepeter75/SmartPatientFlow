@@ -90,8 +90,9 @@ export default function PatientForm({ onTokenIssued, lastToken }: PatientFormPro
       } else {
         throw new Error("Failed to generate token number");
       }
-    } catch (error) {
-      console.error('Registration failed:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Registration failed:', errorMessage);
       toast({
         title: "Registration failed",
         description: "Error registering patient. Please try again.",
