@@ -1,6 +1,17 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
-import { getAuth, signInAnonymously } from "firebase/auth";
+import { 
+  getDatabase, 
+  connectDatabaseEmulator, 
+  ref, 
+  set, 
+  get, 
+  update, 
+  onValue, 
+  push, 
+  remove,
+  runTransaction
+} from "firebase/database";
+import { getAuth, signInAnonymously, connectAuthEmulator } from "firebase/auth";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,26 +26,57 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-let app: any;
-let db: any;
-let auth: any;
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
 
+// Use Replit's environment to determine if we're in development
+const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
+
+// Initialization function
 export function initializeFirebase() {
   try {
-    app = initializeApp(firebaseConfig);
-    db = getDatabase(app);
-    auth = getAuth(app);
+    console.log("Initializing Firebase...");
     
     // Anonymous authentication
     signInAnonymously(auth)
-      .then(() => console.log("Signed in anonymously"))
+      .then(() => console.log("Firebase: Signed in anonymously"))
       .catch(error => {
-        console.error("Auth error:", error);
+        console.error("Firebase: Auth error:", error);
       });
   } catch (error) {
-    console.error("Error initializing Firebase:", error);
+    console.error("Firebase: Error initializing:", error);
   }
 }
 
-// Export Firebase database and auth
-export { db, auth };
+// Helper function for incrementing counter (similar to the transaction in app.js)
+export async function incrementCounter(counterPath: string): Promise<number | null> {
+  try {
+    const counterRef = ref(db, counterPath);
+    const result = await runTransaction(counterRef, (current) => {
+      return (current || 0) + 1;
+    });
+    
+    if (result.committed) {
+      return result.snapshot.val();
+    }
+    return null;
+  } catch (error) {
+    console.error('Transaction failed:', error);
+    return null;
+  }
+}
+
+// Export Firebase database, auth and Firebase functions
+export { 
+  db, 
+  auth, 
+  ref, 
+  set, 
+  get, 
+  update, 
+  onValue, 
+  push, 
+  remove, 
+  runTransaction 
+};

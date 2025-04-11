@@ -5,8 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { db } from "@/lib/firebase";
-import { ref, transaction, update } from "firebase/database";
+import { db, ref, runTransaction, update, incrementCounter } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import { recommendRoom } from "@/lib/roomAssignment";
 import { Room } from "@/types";
@@ -48,14 +47,11 @@ export default function PatientForm({ onTokenIssued, lastToken }: PatientFormPro
       return;
     }
 
-    // Generate token number
-    const counterRef = ref(db, 'counter');
-    
-    transaction(counterRef, (current) => {
-      return (current || 0) + 1;
-    }).then((result) => {
-      if (result.committed) {
-        const tokenNumber = result.snapshot.val();
+    try {
+      // Use our helper function to increment the counter
+      const tokenNumber = await incrementCounter('counter');
+      
+      if (tokenNumber) {
         const tokenId = `T${tokenNumber}`;
         
         // Get the recommended room assignment
@@ -76,45 +72,32 @@ export default function PatientForm({ onTokenIssued, lastToken }: PatientFormPro
         
         // Save to database
         const tokensRef = ref(db, `patients/tokens/${tokenId}`);
-        update(tokensRef, tokenData)
-          .then(() => {
-            // Update the last token display
-            onTokenIssued(tokenId);
-            
-            toast({
-              title: "Patient registered",
-              description: `Token ${tokenId} assigned to ${name}${assignedRoom ? ` in ${assignedRoom}` : ''}`
-            });
-            
-            // Clear form
-            setName('');
-            setDepartment('General');
-            setPatientType('new');
-            setIsEmergency(false);
-          })
-          .catch(error => {
-            console.error('Error saving token:', error);
-            toast({
-              title: "Registration failed",
-              description: "Error saving token. Please try again.",
-              variant: "destructive"
-            });
-          });
-      } else {
+        await update(tokensRef, tokenData);
+        
+        // Update the last token display
+        onTokenIssued(tokenId);
+        
         toast({
-          title: "Registration failed",
-          description: "Error generating token. Please try again.",
-          variant: "destructive"
+          title: "Patient registered",
+          description: `Token ${tokenId} assigned to ${name}${assignedRoom ? ` in ${assignedRoom}` : ''}`
         });
+        
+        // Clear form
+        setName('');
+        setDepartment('General');
+        setPatientType('new');
+        setIsEmergency(false);
+      } else {
+        throw new Error("Failed to generate token number");
       }
-    }).catch(error => {
-      console.error('Transaction failed', error);
+    } catch (error) {
+      console.error('Registration failed:', error);
       toast({
         title: "Registration failed",
-        description: "Error generating token. Please try again.",
+        description: "Error registering patient. Please try again.",
         variant: "destructive"
       });
-    });
+    }
   };
 
   return (
