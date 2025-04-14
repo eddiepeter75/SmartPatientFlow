@@ -59,13 +59,13 @@ export default function Triage() {
       // First check for urgent patients
       let foundPatient = false;
       let patientId = '';
-      let patient = null;
+      let patient: Patient | null = null;
       
       // First pass: Look for urgent cases
       Object.entries(tokens).forEach(([id, token]: [string, any]) => {
         if (token.status === 'waiting' && token.priority === 'urgent' && !foundPatient) {
           patientId = id;
-          patient = token;
+          patient = token as Patient;
           foundPatient = true;
         }
       });
@@ -74,11 +74,11 @@ export default function Triage() {
       if (!foundPatient) {
         const sortedTokens = Object.entries(tokens)
           .filter(([, token]: [string, any]) => token.status === 'waiting')
-          .sort((a, b) => a[1].timestamp - b[1].timestamp);
+          .sort((a, b) => (a[1] as any).timestamp - (b[1] as any).timestamp);
         
         if (sortedTokens.length > 0) {
           patientId = sortedTokens[0][0];
-          patient = sortedTokens[0][1];
+          patient = sortedTokens[0][1] as Patient;
           foundPatient = true;
         }
       }
@@ -89,24 +89,25 @@ export default function Triage() {
           status: 'in-triage',
           called: true
         }).then(() => {
-          setCurrentPatient({ ...patient, id: patientId });
+          setCurrentPatient({ ...patient, id: patientId } as Patient);
           
           // Use room assignment from patient if it exists
-          if (patient.assignedRoom) {
+          if (patient?.assignedRoom) {
             setAssignedRoom(patient.assignedRoom);
           }
           
-          // Announce the token
-          if ('speechSynthesis' in window) {
+          // Announce the token and patient name
+          if ('speechSynthesis' in window && patient) {
             const utterance = new SpeechSynthesisUtterance(
-              `Token ${patientId}, please proceed to triage`
+              `Patient ${patient.name}, token number ${patient.number}, please proceed to triage`
             );
+            utterance.rate = 0.9; // Slightly slower for clarity
             window.speechSynthesis.speak(utterance);
           }
           
           toast({
             title: "Patient called",
-            description: `Patient ${patient.name} has been called to triage`
+            description: `Patient ${patient?.name} has been called to triage`
           });
         });
       } else {

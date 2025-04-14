@@ -102,11 +102,11 @@ export default function Doctor() {
     if (!foundPatient) {
       const sortedTokens = Object.entries(tokens)
         .filter(([, token]: [string, any]) => token.status === 'waiting-consultation')
-        .sort((a, b) => a[1].timestamp - b[1].timestamp);
+        .sort((a, b) => (a[1] as any).timestamp - (b[1] as any).timestamp);
       
       if (sortedTokens.length > 0) {
         patientId = sortedTokens[0][0];
-        patient = sortedTokens[0][1];
+        patient = sortedTokens[0][1] as Patient;
         foundPatient = true;
       }
     }
@@ -119,19 +119,20 @@ export default function Doctor() {
         doctorRoom: doctorRoom,
         currentRoom: roomDisplay
       }).then(() => {
-        setCurrentPatient({ ...patient, id: patientId });
+        setCurrentPatient({ ...patient, id: patientId } as Patient);
         
-        // Announce the token
-        if ('speechSynthesis' in window) {
+        // Announce the token and patient name
+        if ('speechSynthesis' in window && patient) {
           const utterance = new SpeechSynthesisUtterance(
-            `Token ${patientId}, please proceed to ${roomDisplay}`
+            `Patient ${patient.name}, token number ${patient.number}, please proceed to ${roomDisplay}`
           );
+          utterance.rate = 0.9; // Slightly slower for clarity
           window.speechSynthesis.speak(utterance);
         }
         
         toast({
           title: "Patient called",
-          description: `Patient ${patient.name} has been called to ${roomDisplay}`
+          description: `Patient ${patient?.name} has been called to ${roomDisplay}`
         });
       });
     } else {

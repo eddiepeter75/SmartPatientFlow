@@ -113,7 +113,7 @@ export default function Display() {
       ? ` to ${patient.assignedRoom}`
       : " to the consultation area";
     
-    setAnnouncement(`${patient.name}, please proceed${roomDirection}`);
+    setAnnouncement(`${patient.name}, token number ${patient.number}, please proceed${roomDirection}`);
     setHighlightAnnouncement(true);
     
     // Play sound notification
@@ -123,7 +123,7 @@ export default function Display() {
           // Text-to-speech announcement
           if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(
-              `Patient ${patient.name}, please proceed${roomDirection}`
+              `Patient ${patient.name}, token number ${patient.number}, please proceed${roomDirection}`
             );
             utterance.rate = 0.9; // Slightly slower for clarity
             speechSynthesis.speak(utterance);
